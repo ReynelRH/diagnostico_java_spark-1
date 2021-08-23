@@ -42,7 +42,7 @@ public class Transformer extends Writer {
         df.printSchema();
 
         // Uncomment when you want write your final output
-        //write(df, prop.getProperty("pathOut") + prop.get("outputDataFileName"));
+        write(df, prop.getProperty("pathOut") + prop.get("outputDataFileName"));
     }
 
     /**
@@ -83,7 +83,7 @@ public class Transformer extends Writer {
      * @return a Dataset with filter transformation applied
      * column team_position != null && column short_name != null && column overall != null
      */
-    private Dataset<Row> cleanData(Dataset<Row> df) {
+    public Dataset<Row> cleanData(Dataset<Row> df) {
         df = df.filter(
                 teamPosition.column().isNotNull().and(
                         shortName.column().isNotNull()
@@ -203,5 +203,65 @@ public class Transformer extends Writer {
                 )
         );
         return df;
+    }
+
+    /**
+     * Test for filters player_cat equal to C and potential_vs_overall > 1.15
+     * @return
+     */
+    public boolean ExecuteCatConditionABTest(){
+        boolean test = false;
+        Dataset<Row> df = readInput();
+        df.printSchema();
+        df = cleanData(df);
+        df = filterAgePlayersFunction(df);
+        df = playerCatFunction(df);
+        df = potentialVsOverallFunction(df);
+        df = columnSelection(df);
+        df = filtersByPlayerCatAndPotentialVsOverallFunction(df);
+        df = df.filter(playerCat.column().equalTo("A").or(playerCat.column().equalTo("B")));
+        if(!df.isEmpty())
+            test = true;
+        return test;
+    }
+
+    /**
+     * Test for filters player_cat equal to C and potential_vs_overall > 1.15
+     * @return
+     */
+    public boolean ExecuteCatConditionCTest(){
+        boolean test = false;
+        Dataset<Row> df = readInput();
+        df.printSchema();
+        df = cleanData(df);
+        df = filterAgePlayersFunction(df);
+        df = playerCatFunction(df);
+        df = potentialVsOverallFunction(df);
+        df = columnSelection(df);
+        df = filtersByPlayerCatAndPotentialVsOverallFunction(df);
+        df = df.filter(playerCat.column().equalTo("C").and(potentialVsOverall.column().$less(1.15)));
+        if(df.isEmpty())
+            test = true;
+        return test;
+    }
+
+    /**
+     * Test for filters player_cat equal to D and potential_vs_overall > 1.25
+     * @return
+     */
+    public boolean ExecuteCatConditionDTest(){
+        boolean test = false;
+        Dataset<Row> df = readInput();
+        df.printSchema();
+        df = cleanData(df);
+        df = filterAgePlayersFunction(df);
+        df = playerCatFunction(df);
+        df = potentialVsOverallFunction(df);
+        df = columnSelection(df);
+        df = filtersByPlayerCatAndPotentialVsOverallFunction(df);
+        df = df.filter(playerCat.column().equalTo("D").and(potentialVsOverall.column().$less(1.25)));
+        if(df.isEmpty())
+            test = true;
+        return test;
     }
 }
